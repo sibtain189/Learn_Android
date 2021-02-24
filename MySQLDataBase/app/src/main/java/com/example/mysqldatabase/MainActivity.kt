@@ -6,22 +6,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnRowItemClicked {
 
     lateinit var adapter: DatabaseAdapter
+    val dbHandler= DataBaseHandler(this)
 
-    // var tasks= mutableListOf<String>()
-    var tasks: MutableList<String> = mutableListOf<String>()
-
+    var tasks = mutableListOf<TaskModel>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
-        val dbHandler = DataBaseHandler(this)
-
 
 
         btnAddTask.setOnClickListener {
@@ -44,16 +39,38 @@ class MainActivity : AppCompatActivity() {
             tasks.addAll(taskList)
             adapter.notifyDataSetChanged()
 
-
-
         }
+
         setRecycler()
     }
 
     private fun setRecycler() {
-        adapter = DatabaseAdapter(tasks as ArrayList<String>)
+        adapter = DatabaseAdapter(tasks as ArrayList<TaskModel>,this)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
     }
+
+    override fun onEditButtonClicked(task: TaskModel) {
+
+        task.title = "new - title "
+        task.desc = "new desc"
+        dbHandler.editTask(task)
+
+        val newTask = dbHandler.getTasks()
+        tasks.clear()
+        tasks.addAll(newTask)
+        adapter.notifyDataSetChanged()
+
+    }
+
+    override fun onDeleteButtonClicked(task: TaskModel) {
+dbHandler.deleteTask(task)
+        val newTask=dbHandler.getTasks()
+        tasks.clear()
+        tasks.addAll(newTask)
+        adapter.notifyDataSetChanged()
+    }
 }
+
+
